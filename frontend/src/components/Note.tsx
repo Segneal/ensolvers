@@ -3,7 +3,6 @@ import { BsPencil } from "react-icons/bs";
 import { BsTrash } from "react-icons/bs";
 import { BsArchiveFill } from "react-icons/bs";
 import { BsJournalArrowUp } from "react-icons/bs";
-import { TagType } from "../types/TagType";
 import { NoteType } from "../types/NoteType";
 
 type NoteProps = {
@@ -19,17 +18,6 @@ export default function Note({
   handleDelete,
   handleModify,
 }: NoteProps) {
-  const showTags = () => {
-    if (note?.tags) return;
-    return note?.tags?.map((tag: TagType) => {
-      return (
-        <h1 className="bg-slate-600 rounded-md px-2 border-black border-2 select-none">
-          {tag.value}
-        </h1>
-      );
-    });
-  };
-
   return (
     <section className=" gap-2 z-10 p-4 bg-slate-500 h-[150px] md:h-[200px] lg:h-[250px] rounded-md border-white shadow-sm text-left shadow-white flex">
       <span className="w-[15%] md:w-[18%] lg:w-[20%] items-center flex p-1 md:p-2 lg:p-3">
@@ -43,7 +31,6 @@ export default function Note({
         <h1 className="h-[20%] overflow-hidden text-sm">
           Last Modified: {note.lastModified.toString().slice(0, 10)}
         </h1>
-        <span className="flex gap-2">{showTags()}</span>
       </span>
       <span className="flex flex-col lg:flex-row justify-center place-items-center w-[30%]  bottom-[10%] right-0 gap-2">
         {note.status ? (

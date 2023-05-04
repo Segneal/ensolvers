@@ -3,8 +3,8 @@ dotenv.config();
 
 const dbConfig = {
   HOST: process.env.DB_HOST || "localhost",
-  USER: "root",
-  PASSWORD: "root",
+  USER: process.env.DB_OWNER || "ensolvers",
+  PASSWORD: process.env.PASSWORD || "root",
   DB: process.env.DB || "ensolvers",
   PORT: process.env.DB_PORT || 3306,
   dialect: "mysql",
