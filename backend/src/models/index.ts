@@ -2,7 +2,6 @@ import dbConfig from "../configs/dbConfig";
 import { Sequelize } from "sequelize";
 import { Dialect } from "sequelize/types";
 import { Note, initNote } from "./Note";
-import { Tag, initTag } from "./Tag";
 import mysql from "mysql2/promise";
 
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
@@ -25,10 +24,6 @@ const db = async () => {
     sequelize.authenticate();
     //init tables
     initNote(sequelize);
-    initTag(sequelize);
-    Note.belongsToMany(Tag, { through: "note_tag" });
-    Tag.belongsToMany(Note, { through: "note_tag" });
-    // Definir la relación many-to-many
 
     return sequelize.sync();
   } catch (error) {

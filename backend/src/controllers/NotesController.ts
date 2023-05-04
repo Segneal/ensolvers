@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { Note } from "../models/Note";
-import { Tag } from "../models/Tag";
 
 const getAll = async (req: Request, res: Response) => {
   //find all notes from database
@@ -15,8 +14,7 @@ const createNote = async (req: Request, res: Response) => {
   //also create all the tags
   const newNote = await Note.findOne({ where: { id: note.id } });
   if (!newNote) {
-    await Tag.bulkCreate(req.body.tags);
-    await Note.create(req.body);
+    const createdNote = await Note.create(req.body);
     res.status(200).json({ message: "Note created successfully" });
   } else {
     res.status(400).json({ message: "Note already exists" });

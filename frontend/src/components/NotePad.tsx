@@ -4,16 +4,13 @@ import { createNote, deleteNote, getNotes, updateNote } from "../services/api";
 import Select from "react-select";
 import Note from "./Note";
 import Modal from "./UI/Modal";
-import { getTags } from "../services/apiTags";
 import DeleteModal from "./UI/DeleteModal";
 import { NoteType } from "../types/NoteType";
-import { TagType } from "../types/TagType";
 
 const newNote: NoteType = {
   id: null as any,
   title: "",
   description: "",
-  tags: null || ([] as TagType[]),
   status: true,
   lastModified: new Date(),
 };
@@ -25,13 +22,11 @@ export default function NotePad() {
     id: "",
     title: "",
     description: "",
-    tags: [{ id: "asdasd", value: "sarasa", label: "sasasa" }] as TagType[],
     status: true,
     lastModified: new Date(),
   });
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
-  const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
   const [idToDelete, setIdToDelete] = useState<string>("");
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -42,11 +37,7 @@ export default function NotePad() {
       staleTime: 1000 * 60 * 5,
     }
   );
-  const { data: allTags, isLoading: tagsLoading } = useQuery<TagType[]>(
-    "tags",
-    async () => getTags(),
-    { staleTime: 1000 * 60 * 5 }
-  );
+
   //mutate notes
   const updateNoteMutation = useMutation(updateNote, {
     onSuccess: () => {
@@ -80,7 +71,6 @@ export default function NotePad() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("notes");
-        queryClient.invalidateQueries("tags");
       },
     }
   );
@@ -134,15 +124,8 @@ export default function NotePad() {
 
   const renderNotes = () => {
     //returns only notes that are equal to showArchived
-    //and notes that are being searched by tags
-    let filteredNotes = data?.filter((note) => note.status === !showArchived);
-    //check if tags to search is not empty
-    if (selectedTags?.length > 0) {
-      //filter notes by tags
-      filteredNotes = filteredNotes?.filter((note) => {
-        //check if note has tags
-      });
-    }
+
+    const filteredNotes = data?.filter((note) => note.status === showArchived);
 
     return filteredNotes?.map((note) => {
       return (
@@ -157,22 +140,9 @@ export default function NotePad() {
     });
   };
 
-  const renderTags = () => {
-    return allTags?.map((tag) => {
-      return {
-        value: tag.id,
-        label: tag.label,
-      };
-    });
-  };
-
-  const handleSelect = (selectedOption: any) => {
-    setSelectedTags(selectedOption);
-  };
-
   return (
     <>
-      {isLoading || tagsLoading ? (
+      {isLoading ? (
         <div>Loading...</div>
       ) : (
         <>
@@ -209,20 +179,6 @@ export default function NotePad() {
                 Create Note
               </button>
             </span>
-            <div className="gap-1 md:gap-2 lg:gap-4 flex w-[40%] px-2 md:px-4 lg:px-6 xl:px-8 2xl:px-10 text-white w-full">
-              <label htmlFor="search" className="">
-                Search by tag
-              </label>
-              <Select
-                isMulti
-                defaultValue={selectedOption}
-                className="z-[30] w-[300px] md:w-[400px]
-                lg:w-[500px] xl:w-[6000px] 2xl:w-[800px]
-                text-gray-500"
-                onChange={handleSelect}
-                options={renderTags()}
-              />
-            </div>
           </div>
           <section className="flex flex-col pt-4 text-center text-white gap-4 relative min-h-[calc(100vh-200px)]">
             <section className="grid grid-cols-1 md:grid-cols-2  gap-2 md:gap-4 lg:gap-6 p-2 md:p-4 lg:p-6">

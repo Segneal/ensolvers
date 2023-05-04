@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import db from "./models";
 import notesRoutes from "./routes/NotesRoutes";
-import tagsRoutes from "./routes/TagRoutes";
 import cors from "cors";
 import bodyParser from "body-parser";
 
@@ -20,7 +19,6 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.use("/tags", tagsRoutes);
 app.use("/notes", notesRoutes);
 
 try {

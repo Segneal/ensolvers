@@ -18,19 +18,13 @@ function Modal({
   handleUpdate,
   selectedNote,
 }: modalProps) {
-  const [newTag, setNewTag] = useState<string>("");
   const [modifiedNote, setModifiedNote] = useState<NoteType>({
     ...selectedNote,
   });
 
   useEffect(() => {
     setModifiedNote({ ...selectedNote });
-    setNewTag("");
   }, [isOpen]);
-
-  const handleChangeTag = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTag(e.target.value);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setModifiedNote({
@@ -50,63 +44,6 @@ function Modal({
     else {
       handleUpdate(modifiedNote);
       setIsOpen(false);
-    }
-  };
-
-  const handleAddTag = () => {
-    //if tag is empty return
-    if (newTag === "") return;
-    //if tags is null create new array and add tag
-    if (modifiedNote?.tags === null) {
-      setModifiedNote({
-        ...modifiedNote,
-        tags: [{ id: uuid(), value: newTag, label: newTag }],
-      });
-    }
-    //else add tag if not already added
-    else {
-      //check if tag is already added
-      if (modifiedNote?.tags?.find((tag) => tag.value === newTag)) return;
-      //add tag
-      setModifiedNote({
-        ...modifiedNote,
-        tags: [
-          ...modifiedNote?.tags,
-          { id: uuid(), value: newTag, label: newTag },
-        ],
-      });
-    }
-    console.log(modifiedNote.tags);
-    //clear input
-    setNewTag("");
-  };
-
-  const removeTag = (tag: string) => {
-    setModifiedNote({
-      ...modifiedNote,
-      tags: modifiedNote?.tags?.filter((t) => t.id !== tag),
-    });
-  };
-
-  const showTags = () => {
-    //render tags if there are any
-    if (modifiedNote?.tags?.length > 0) {
-      return modifiedNote?.tags?.map((tag) => {
-        //add button to remove tag
-        return (
-          <span
-            key={tag.id}
-            className="flex gap-2 items-center justify-center text-center"
-          >
-            <span className="bg-gray-200 rounded-lg px-2 py-1 text-sm font-semibold text-gray-700 ">
-              {tag.value}
-              <button className="p-auto" onClick={() => removeTag(tag.id)}>
-                <AiFillCloseCircle className="w-[25px]"></AiFillCloseCircle>
-              </button>
-            </span>
-          </span>
-        );
-      });
     }
   };
 
@@ -150,31 +87,6 @@ function Modal({
                   className="w-full border text-gray-400 border-gray-300 rounded py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
                   placeholder="Add description here"
                 ></textarea>
-              </div>
-              <div className="mb-4 flex flex-col gap-4">
-                <label className="block font-bold mb-2" htmlFor="tags">
-                  Tags
-                </label>
-                <div className="flex flex-row gap-2">
-                  <input
-                    className="w-full border border-gray-300 rounded py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
-                    id="tags"
-                    onChange={handleChangeTag}
-                    name="newTag"
-                    value={newTag}
-                    type="text"
-                    placeholder="Add new tags here"
-                  />
-                  <button
-                    onClick={handleAddTag}
-                    className="bg-white hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-[.5rem] sm:text-[.75rem] md:text-[1rem]"
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-              <div className="flex flex-row gap-2 h-[100px] justify-center items-center flex-wrap">
-                {showTags()}
               </div>
             </div>
             <div className="px-6 py-4 bg-gray-100 border-t flex justify-end gap-2 md:gap-4 lg:gap-6">
