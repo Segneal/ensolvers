@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { v4 as uuid } from "uuid";
+import { NoteType } from "../../types/NoteType";
 
 type modalProps = {
   isOpen: boolean;
@@ -24,7 +25,7 @@ function Modal({
 
   useEffect(() => {
     setModifiedNote({ ...selectedNote });
-    console.log({ ...selectedNote });
+    setNewTag("");
   }, [isOpen]);
 
   const handleChangeTag = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,7 +33,6 @@ function Modal({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.name, e.target.value);
     setModifiedNote({
       ...(modifiedNote as NoteType),
       [e.target.name]: e.target.value,
@@ -54,21 +54,37 @@ function Modal({
   };
 
   const handleAddTag = () => {
-    //add tag if not empty or not repeated
-    if (newTag !== "" && !modifiedNote?.tags?.includes(newTag)) {
+    //if tag is empty return
+    if (newTag === "") return;
+    //if tags is null create new array and add tag
+    if (modifiedNote?.tags === null) {
       setModifiedNote({
-        ...modifiedNote!,
-        tags: [...modifiedNote!.tags, newTag],
+        ...modifiedNote,
+        tags: [{ id: uuid(), value: newTag, label: newTag }],
       });
-      setNewTag("");
     }
+    //else add tag if not already added
+    else {
+      //check if tag is already added
+      if (modifiedNote?.tags?.find((tag) => tag.value === newTag)) return;
+      //add tag
+      setModifiedNote({
+        ...modifiedNote,
+        tags: [
+          ...modifiedNote?.tags,
+          { id: uuid(), value: newTag, label: newTag },
+        ],
+      });
+    }
+    console.log(modifiedNote.tags);
+    //clear input
+    setNewTag("");
   };
 
   const removeTag = (tag: string) => {
-    //remove tag from currentNote
     setModifiedNote({
-      ...modifiedNote!,
-      tags: modifiedNote!.tags?.filter((t) => t !== tag),
+      ...modifiedNote,
+      tags: modifiedNote?.tags?.filter((t) => t.id !== tag),
     });
   };
 
@@ -79,12 +95,12 @@ function Modal({
         //add button to remove tag
         return (
           <span
-            key={tag}
+            key={tag.id}
             className="flex gap-2 items-center justify-center text-center"
           >
             <span className="bg-gray-200 rounded-lg px-2 py-1 text-sm font-semibold text-gray-700 ">
-              {tag}
-              <button className="p-auto" onClick={() => removeTag(tag)}>
+              {tag.value}
+              <button className="p-auto" onClick={() => removeTag(tag.id)}>
                 <AiFillCloseCircle className="w-[25px]"></AiFillCloseCircle>
               </button>
             </span>
@@ -99,8 +115,12 @@ function Modal({
       {!modifiedNote ? (
         <h1>Loading...</h1>
       ) : (
-        <div className="flex items-center justify-center min-h-screen absolute w-full mt-[20%] text-gray-600 text-left pt-[20%]">
-          <div className="bg-white rounded-lg overflow-hidden shadow-xl w-3/4">
+        <div
+          className="flex h-[100vh] items-center justify-center fixed w-full text-gray-600 text-left z-50
+        before:content-[''] before:absolute before:inset-0 before:bg-black before:bg-opacity-50 before:-z-10
+        before:select-none"
+        >
+          <div className="bg-white rounded-lg overflow-hidden shadow-xl w-4/5 md:w-3/4">
             <div className="px-6 py-4 bg-gray-100 border-b flex justify-between items-center">
               <h2 className="text-lg font-semibold">CREATE / EDIT NOTE</h2>
             </div>
@@ -140,6 +160,7 @@ function Modal({
                     className="w-full border border-gray-300 rounded py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
                     id="tags"
                     onChange={handleChangeTag}
+                    name="newTag"
                     value={newTag}
                     type="text"
                     placeholder="Add new tags here"

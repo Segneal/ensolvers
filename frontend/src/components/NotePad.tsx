@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { createNote, deleteNote, getNotes, updateNote } from "../services/api";
+import Select from "react-select";
 import Note from "./Note";
-import Modal from "./Modal";
-import { v4 as uuid } from "uuid";
+import Modal from "./UI/Modal";
+import { getTags } from "../services/apiTags";
+import DeleteModal from "./UI/DeleteModal";
+import { NoteType } from "../types/NoteType";
+import { TagType } from "../types/TagType";
 
 const newNote: NoteType = {
   id: null as any,
   title: "",
   description: "",
-  tags: [],
+  tags: null || ([] as TagType[]),
   status: true,
   lastModified: new Date(),
 };
@@ -21,15 +25,27 @@ export default function NotePad() {
     id: "",
     title: "",
     description: "",
-    tags: [],
+    tags: [{ id: "asdasd", value: "sarasa", label: "sasasa" }] as TagType[],
     status: true,
     lastModified: new Date(),
   });
   const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
+  const [idToDelete, setIdToDelete] = useState<string>("");
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const { data, isLoading } = useQuery<NoteType[]>("notes", async () =>
-    getNotes()
+  const { data, isLoading } = useQuery<NoteType[]>(
+    "notes",
+    async () => getNotes(),
+    {
+      staleTime: 1000 * 60 * 5,
+    }
+  );
+  const { data: allTags, isLoading: tagsLoading } = useQuery<TagType[]>(
+    "tags",
+    async () => getTags(),
+    { staleTime: 1000 * 60 * 5 }
   );
   //mutate notes
   const updateNoteMutation = useMutation(updateNote, {
@@ -37,6 +53,21 @@ export default function NotePad() {
       queryClient.invalidateQueries("notes");
     },
   });
+
+  const openCleanModal = () => {
+    //set selectedNote to newNote
+    setSelectedNote({
+      ...newNote,
+    });
+    setIsOpen(true);
+  };
+
+  useEffect(() => {
+    isOpen || isDeleteOpen
+      ? (document.body.style.overflow = "hidden")
+      : (document.body.style.overflow = "unset");
+  }, [isOpen, isDeleteOpen]);
+
   const deleteNoteMutation = useMutation(deleteNote, {
     onSuccess: () => {
       queryClient.invalidateQueries("notes");
@@ -49,6 +80,7 @@ export default function NotePad() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("notes");
+        queryClient.invalidateQueries("tags");
       },
     }
   );
@@ -64,24 +96,27 @@ export default function NotePad() {
     }
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {};
-
   const handleUpdate = (note: NoteType) => {
     //edit note
-    //mutate notes
     updateNoteMutation.mutate(note);
   };
 
   const handleDelete = (id: string) => {
+    //open confirmation modal
+    setIsDeleteOpen(true);
+    setIdToDelete(id);
+  };
+
+  const confirmDelete = () => {
     //delete note
-    //mutate notes
-    deleteNoteMutation.mutate(id);
+    deleteNoteMutation.mutate(idToDelete);
+    setIsDeleteOpen(false);
+    setIdToDelete("");
   };
 
   const handleArchive = (id: string) => {
     //find note by id and change status to opposite inside of data
     //update note
-    //mutate notes
     const note = data?.find((note) => note.id === id);
     if (note) {
       note.status = !note.status;
@@ -89,17 +124,9 @@ export default function NotePad() {
     }
   };
 
-  const openCleanModal = () => {
-    //set selectedNote to newNote and generate new id
-    setSelectedNote({
-      ...newNote,
-    });
-    setIsOpen(true);
-  };
-
   const handleCreate = (note: NoteType) => {
     //create note
-    //mutate notes
+    if (note.title === "" || note.description === "") return;
     createNoteMutation.mutate(note);
     queryClient.invalidateQueries("notes");
     setIsOpen(false);
@@ -107,59 +134,48 @@ export default function NotePad() {
 
   const renderNotes = () => {
     //returns only notes that are equal to showArchived
-    return data
-      ?.filter((note) => note.status === !showArchived)
-      .map((note) => {
-        return (
-          <Note
-            key={note.id}
-            note={note}
-            handleArchive={handleArchive}
-            handleDelete={handleDelete}
-            handleModify={handleModify}
-          />
-        );
+    //and notes that are being searched by tags
+    let filteredNotes = data?.filter((note) => note.status === !showArchived);
+    //check if tags to search is not empty
+    if (selectedTags?.length > 0) {
+      //filter notes by tags
+      filteredNotes = filteredNotes?.filter((note) => {
+        //check if note has tags
       });
+    }
+
+    return filteredNotes?.map((note) => {
+      return (
+        <Note
+          key={note.id}
+          note={note}
+          handleArchive={handleArchive}
+          handleDelete={handleDelete}
+          handleModify={handleModify}
+        />
+      );
+    });
+  };
+
+  const renderTags = () => {
+    return allTags?.map((tag) => {
+      return {
+        value: tag.id,
+        label: tag.label,
+      };
+    });
+  };
+
+  const handleSelect = (selectedOption: any) => {
+    setSelectedTags(selectedOption);
   };
 
   return (
     <>
-      {isLoading ? (
+      {isLoading || tagsLoading ? (
         <div>Loading...</div>
       ) : (
-        <main className="flex flex-col justify-center text-center text-white gap-4 relative">
-          <header className="h-[100px] pt-4 md:pt-6 lg:pt-8 text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
-            {!showArchived ? <h1>My Notes</h1> : <h1>My Archived Notes</h1>}
-          </header>
-          <span className="p-6 gap-6 flex ml-auto">
-            <button
-              className="bg-white hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-[.5rem] sm:text-[.75rem] md:text-[1rem]"
-              onClick={() => setShowArchived((prev) => !prev)}
-            >
-              Show Archived
-            </button>
-            <button
-              className="bg-white hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-[.5rem] sm:text-[.75rem] md:text-[1rem]"
-              onClick={() => openCleanModal()}
-            >
-              Create Note
-            </button>
-          </span>
-          <div className="gap-1 md:gap-2 lg:gap-4 flex w-[40%] px-2 md:px-4 lg:px-6 xl:px-8 2xl:px-10">
-            <label htmlFor="search" className="">
-              Search by tag
-            </label>
-            <input
-              type="text"
-              placeholder="Search"
-              className="p-2 text-black w-[200px] md:w-[300px] xl:w-[400px] "
-              value={search}
-              onChange={handleSearch}
-            />
-          </div>
-          <section className="grid grid-cols-1 md:grid-cols-2  gap-2 md:gap-4 lg:gap-6 p-2 md:p-4 lg:p-6">
-            {data && renderNotes()}
-          </section>
+        <>
           {isOpen && (
             <Modal
               isOpen={isOpen}
@@ -167,9 +183,53 @@ export default function NotePad() {
               handleCreate={handleCreate}
               handleUpdate={handleUpdate}
               selectedNote={selectedNote}
-            ></Modal>
+            />
           )}
-        </main>
+          {isDeleteOpen && (
+            <DeleteModal
+              confirmDelete={confirmDelete}
+              setIsDeleteOpen={setIsDeleteOpen}
+            />
+          )}
+          <div className="flex flex-col px-2 md:px-4 lg:px-6">
+            <header className="h-[100px] px-4 md:px-6 lg:px-8 pt-4 md:pt-6 lg:pt-8 text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white border-gray-200 ">
+              {!showArchived ? <h1>My Notes</h1> : <h1>My Archived Notes</h1>}
+            </header>
+            <span className="p-4 md:p-6 lg:p-8 gap-6 flex ml-auto">
+              <button
+                className="bg-white hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-[.75rem]  md:text-[1rem]"
+                onClick={() => setShowArchived((prev) => !prev)}
+              >
+                Show Archived
+              </button>
+              <button
+                className="bg-white hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-[.75rem] md:text-[1rem]"
+                onClick={() => openCleanModal()}
+              >
+                Create Note
+              </button>
+            </span>
+            <div className="gap-1 md:gap-2 lg:gap-4 flex w-[40%] px-2 md:px-4 lg:px-6 xl:px-8 2xl:px-10 text-white w-full">
+              <label htmlFor="search" className="">
+                Search by tag
+              </label>
+              <Select
+                isMulti
+                defaultValue={selectedOption}
+                className="z-[30] w-[300px] md:w-[400px]
+                lg:w-[500px] xl:w-[6000px] 2xl:w-[800px]
+                text-gray-500"
+                onChange={handleSelect}
+                options={renderTags()}
+              />
+            </div>
+          </div>
+          <section className="flex flex-col pt-4 text-center text-white gap-4 relative min-h-[calc(100vh-200px)]">
+            <section className="grid grid-cols-1 md:grid-cols-2  gap-2 md:gap-4 lg:gap-6 p-2 md:p-4 lg:p-6">
+              {data && renderNotes()}
+            </section>
+          </section>
+        </>
       )}
     </>
   );

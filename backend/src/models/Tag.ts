@@ -13,7 +13,12 @@ export const initTag = (sequelize: Sequelize) => {
         type: DataTypes.STRING(100),
         primaryKey: true,
       },
-      description: {
+      value: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+        unique: true,
+      },
+      label: {
         type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,

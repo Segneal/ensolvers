@@ -26,17 +26,10 @@ const db = async () => {
     //init tables
     initNote(sequelize);
     initTag(sequelize);
+    Note.belongsToMany(Tag, { through: "note_tag" });
+    Tag.belongsToMany(Note, { through: "note_tag" });
     // Definir la relación many-to-many
-    Note.belongsToMany(Tag, {
-      through: "NoteTag",
-      foreignKey: "noteId",
-      timestamps: false,
-    });
-    Tag.belongsToMany(Note, {
-      through: "NoteTag",
-      foreignKey: "tagId",
-      timestamps: false,
-    });
+
     return sequelize.sync();
   } catch (error) {
     console.log("Unable to connect to the database:", error);

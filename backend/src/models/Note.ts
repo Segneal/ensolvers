@@ -1,4 +1,5 @@
 import { Model, DataTypes, Sequelize } from "sequelize";
+import { Tag } from "./Tag";
 
 export class Note extends Model {
   public id!: number;

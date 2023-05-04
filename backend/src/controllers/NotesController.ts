@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { Note } from "../models/Note";
+import { Tag } from "../models/Tag";
 
 const getAll = async (req: Request, res: Response) => {
   //find all notes from database
+  //with all the tags
   const notes = await Note.findAll();
   res.status(200).json(notes);
 };
@@ -10,9 +12,11 @@ const getAll = async (req: Request, res: Response) => {
 const createNote = async (req: Request, res: Response) => {
   const note = req.body;
   //if note doesnt exist, create it
+  //also create all the tags
   const newNote = await Note.findOne({ where: { id: note.id } });
   if (!newNote) {
-    await Note.create(note);
+    await Tag.bulkCreate(req.body.tags);
+    await Note.create(req.body);
     res.status(200).json({ message: "Note created successfully" });
   } else {
     res.status(400).json({ message: "Note already exists" });

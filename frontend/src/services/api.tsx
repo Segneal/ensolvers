@@ -1,4 +1,5 @@
 import axios from "axios";
+import { NoteType } from "../types/NoteType";
 const API_URL = "http://localhost:3000/notes";
 
 export const getNotes = async () => {
@@ -7,6 +8,7 @@ export const getNotes = async () => {
 };
 
 export const createNote = async (note: NoteType) => {
+  console.log(note);
   const response = await axios.post(API_URL + "/create", note);
   return response.data;
 };
