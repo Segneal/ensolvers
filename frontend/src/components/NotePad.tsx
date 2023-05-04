@@ -1,15 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { createNote, deleteNote, getNotes, updateNote } from "../services/api";
 import Note from "./Note";
 import Modal from "./Modal";
+import { v4 as uuid } from "uuid";
+
+const newNote: NoteType = {
+  id: null as any,
+  title: "",
+  description: "",
+  tags: [],
+  status: true,
+  lastModified: new Date(),
+};
 
 export default function NotePad() {
   const queryClient = useQueryClient();
   const [showArchived, setShowArchived] = useState<boolean>(false);
-  const [selectedNote, setSelectedNote] = useState<NoteType | undefined>(
-    undefined
-  );
+  const [selectedNote, setSelectedNote] = useState<NoteType>({
+    id: "",
+    title: "",
+    description: "",
+    tags: [],
+    status: true,
+    lastModified: new Date(),
+  });
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState<string>("");
 
@@ -38,15 +53,18 @@ export default function NotePad() {
     }
   );
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value.toLowerCase();
-    setSearch(searchTerm);
-    //filter out notes that don't contain search
-    //set filtered notes
-    const filteredNotes = data?.filter((note) =>
-      note.tags.some((tag) => tag.toLowerCase().includes(searchTerm))
-    );
+  const handleModify = (id: string) => {
+    //find note by id and set it to selectedNote
+    const note = data?.find((note) => note.id === id);
+    if (note) {
+      setSelectedNote({
+        ...note,
+      });
+      setIsOpen(true);
+    }
   };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
   const handleUpdate = (note: NoteType) => {
     //edit note
@@ -71,22 +89,20 @@ export default function NotePad() {
     }
   };
 
+  const openCleanModal = () => {
+    //set selectedNote to newNote and generate new id
+    setSelectedNote({
+      ...newNote,
+    });
+    setIsOpen(true);
+  };
+
   const handleCreate = (note: NoteType) => {
     //create note
     //mutate notes
     createNoteMutation.mutate(note);
     queryClient.invalidateQueries("notes");
-    setSelectedNote(undefined);
     setIsOpen(false);
-  };
-
-  const handleEditNote = (id: string) => {
-    //find note by id
-    //set selected note
-    //open modal
-    const note = data?.find((note) => note.id === id);
-    setSelectedNote(note);
-    console.log(selectedNote);
   };
 
   const renderNotes = () => {
@@ -100,8 +116,7 @@ export default function NotePad() {
             note={note}
             handleArchive={handleArchive}
             handleDelete={handleDelete}
-            handleEditNote={handleEditNote}
-            handleUpdate={handleUpdate}
+            handleModify={handleModify}
           />
         );
       });
@@ -125,7 +140,7 @@ export default function NotePad() {
             </button>
             <button
               className="bg-white hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-[.5rem] sm:text-[.75rem] md:text-[1rem]"
-              onClick={() => setIsOpen((prev) => !prev)}
+              onClick={() => openCleanModal()}
             >
               Create Note
             </button>
@@ -151,7 +166,7 @@ export default function NotePad() {
               setIsOpen={setIsOpen}
               handleCreate={handleCreate}
               handleUpdate={handleUpdate}
-              note={selectedNote}
+              selectedNote={selectedNote}
             ></Modal>
           )}
         </main>

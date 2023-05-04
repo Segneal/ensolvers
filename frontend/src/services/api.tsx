@@ -20,3 +20,8 @@ export const deleteNote = async (id: string) => {
   const response = await axios.delete(API_URL + `/delete/${id}`);
   return response.data;
 };
+
+export const findById = async (id: string) => {
+  const response = await axios.get(API_URL + `/findById/${id}`);
+  return response.data;
+};

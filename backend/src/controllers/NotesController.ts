@@ -25,6 +25,7 @@ const updateNote = async (req: Request, res: Response) => {
   //if note exists, update it
   const newNote = await Note.findOne({ where: { id: id } });
   if (newNote) {
+    newNote!.lastModified = new Date();
     await Note.update(note, { where: { id: id } });
     res.status(200).json({ message: "Note updated successfully" });
   } else {
@@ -45,4 +46,14 @@ const deleteNote = async (req: Request, res: Response) => {
   }
 };
 
-export default { createNote, updateNote, deleteNote, getAll };
+const findById = async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const newNote = await Note.findOne({ where: { id: id } });
+  if (newNote) {
+    res.status(200).json(newNote);
+  } else {
+    res.status(400).json({ message: "Note doesn't exist" });
+  }
+};
+
+export default { createNote, updateNote, deleteNote, getAll, findById };

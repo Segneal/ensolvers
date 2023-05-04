@@ -8,30 +8,29 @@ type NoteProps = {
   note: NoteType;
   handleArchive: (id: string) => void;
   handleDelete: (id: string) => void;
-  handleUpdate: (id: NoteType) => void;
-  handleEditNote: (id: string) => void;
+  handleModify: (id: string) => void;
 };
 
 export default function Note({
   note,
   handleArchive,
   handleDelete,
-  handleUpdate,
-  handleEditNote,
+  handleModify,
 }: NoteProps) {
   const archiveThis = () => {
     handleArchive(note.id);
-  };
-
-  const editThis = () => {
-    handleEditNote(note.id);
   };
 
   const deleteThis = () => {
     handleDelete(note.id);
   };
 
+  const modifyThis = () => {
+    handleModify(note.id);
+  };
+
   const showTags = () => {
+    if (note?.tags) return;
     return note?.tags?.map((tag) => {
       return (
         <h1 className="bg-slate-600 rounded-md px-2 border-black border-2 select-none">
@@ -70,7 +69,7 @@ export default function Note({
         )}
         <BsPencil
           className="w-[25%] h-auto hover:scale-105 transition-all"
-          onClick={editThis}
+          onClick={modifyThis}
         />
         <BsTrash
           className="w-[25%] h-auto hover:scale-105 transition-all"
