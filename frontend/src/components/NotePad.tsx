@@ -122,7 +122,7 @@ export default function NotePad() {
 
   const renderNotes = () => {
     //returns only notes that are equal to showArchived
-
+    if (!data) return;
     const filteredNotes = data?.filter((note) => note.status === showArchived);
 
     return filteredNotes?.map((note) => {
