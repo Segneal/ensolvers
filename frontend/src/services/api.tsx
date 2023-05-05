@@ -1,7 +1,8 @@
 import axios from "axios";
 import { NoteType } from "../types/NoteType";
-const API_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
-
+const API_URL =
+  import.meta.env.VITE_SERVER_URL ||
+  "https://ensolvers-production.up.railway.app";
 export const getNotes = async () => {
   const response = await axios.get(API_URL + "/notes/getAll");
   return response.data;
