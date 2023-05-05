@@ -3,7 +3,7 @@ dotenv.config();
 
 const dbConfig = {
   HOST:
-    process.env.DB_URL || "ensolver.cuati96ncsva.sa-east-1.rds.amazonaws.com",
+    process.env.DB_URL || "localhost",
   USER: process.env.DB_OWNER || "root",
   PASSWORD: process.env.PASSWORD || "root",
   DB: process.env.DB || "ensolvers",
