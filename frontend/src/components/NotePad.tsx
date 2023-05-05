@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { createNote, deleteNote, getNotes, updateNote } from "../services/api";
-import Select from "react-select";
 import Note from "./Note";
 import Modal from "./UI/Modal";
 import DeleteModal from "./UI/DeleteModal";
@@ -26,7 +25,6 @@ export default function NotePad() {
     lastModified: new Date(),
   });
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
   const [idToDelete, setIdToDelete] = useState<string>("");
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 

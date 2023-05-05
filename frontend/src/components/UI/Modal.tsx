@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { AiFillCloseCircle } from "react-icons/ai";
 import { v4 as uuid } from "uuid";
 import { NoteType } from "../../types/NoteType";
 
