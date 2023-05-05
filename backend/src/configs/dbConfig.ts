@@ -2,7 +2,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const dbConfig = {
-  HOST: process.env.DB_HOST || "localhost",
+  HOST:
+    process.env.DB_HOST ||
+    "ensolvers.cluster-cuati96ncsva.sa-east-1.rds.amazonaws.com",
   USER: process.env.DB_OWNER || "ensolvers",
   PASSWORD: process.env.PASSWORD || "root",
   DB: process.env.DB || "ensolvers",
