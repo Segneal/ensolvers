@@ -3,9 +3,9 @@ dotenv.config();
 
 const dbConfig = {
   HOST:
-    process.env.DB_HOST ||
+    process.env.DB_URL ||
     "ensolvers.cluster-cuati96ncsva.sa-east-1.rds.amazonaws.com",
-  USER: process.env.DB_OWNER || "ensolvers",
+  USER: process.env.DB_OWNER || "root",
   PASSWORD: process.env.PASSWORD || "root",
   DB: process.env.DB || "ensolvers",
   PORT: process.env.DB_PORT || 3306,
