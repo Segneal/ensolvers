@@ -141,7 +141,9 @@ export default function NotePad() {
   return (
     <>
       {isLoading ? (
-        <div>Loading...</div>
+        <div className="flex text-white justify-center items-center text-center">
+          Loading...
+        </div>
       ) : (
         <>
           {isOpen && (

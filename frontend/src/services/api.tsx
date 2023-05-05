@@ -1,8 +1,7 @@
 import axios from "axios";
 import { NoteType } from "../types/NoteType";
-const API_URL =
-  import.meta.env.VITE_SERVER_URL ||
-  "https://ensolvers-production.up.railway.app";
+const API_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+
 export const getNotes = async () => {
   const response = await axios.get(API_URL + "/notes/getAll");
   return response.data;
@@ -11,6 +10,7 @@ export const getNotes = async () => {
 export const createNote = async (note: NoteType) => {
   console.log(note);
   const response = await axios.post(API_URL + "/notes/create", note);
+
   return response.data;
 };
 
